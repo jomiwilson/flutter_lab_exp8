@@ -1,0 +1,53 @@
+name: Screenshots
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - tool/screenshots.mjs
+      - .github/workflows/screenshots.yml
+      - lib/**
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  screenshots:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - name: Generate web folder
+        run: flutter create . --platforms=web --project-name sqlite_app
+      - name: Remove default sample test
+        run: rm -rf test
+      - run: flutter pub get
+      - name: Set up SQLite for web
+        run: dart run sqflite_common_ffi_web:setup
+      - name: Build web
+        run: flutter build web --release
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Install Playwright
+        run: |
+          npm install --no-save playwright@1.48.2
+          npx playwright install --with-deps chromium
+      - name: Take screenshots
+        env:
+          EXP: "8"
+        run: |
+          python3 -m http.server 8080 -d build/web > /dev/null 2>&1 &
+          sleep 3
+          node tool/screenshots.mjs
+      - name: Commit screenshots
+        run: |
+          git config user.name "Jomi W"
+          git config user.email "jomiwilson@users.noreply.github.com"
+          git add screenshots
+          git commit -m "Add app screenshots [skip ci]" || echo "nothing to commit"
+          git push

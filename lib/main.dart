@@ -1,15 +1,26 @@
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:sqflite/sqflite.dart';
+import 'package:sqflite_common_ffi_web/sqflite_ffi_web.dart';
 import 'database_helper.dart';
 import 'firebase_options.dart';
 import 'firebase_page.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  // SQLite on the web uses the sqflite web (WASM) implementation
+  if (kIsWeb) {
+    databaseFactory = databaseFactoryFfiWeb;
+  }
   // Initialize Firebase before running the application
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+  try {
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    ).timeout(const Duration(seconds: 5));
+  } catch (e) {
+    debugPrint('Firebase not configured yet: $e');
+  }
   runApp(const MyApp());
 }
 

@@ -38,3 +38,6 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+node_modules/
+package-lock.json
+package.json

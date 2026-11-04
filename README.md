@@ -19,6 +19,14 @@ This experiment introduces data persistence in Flutter using local and cloud sto
 - `lib/main.dart`
 - `lib/firebase_page.dart`
 
+## Running on the web
+
+SQLite on the web needs its WASM files once:
+
+```bash
+dart run sqflite_common_ffi_web:setup
+```
+
 ## How to run
 
 The repository contains the Dart source and `pubspec.yaml`. Generate the platform folders once, then run:
