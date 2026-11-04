@@ -27,6 +27,8 @@ SQLite on the web needs its WASM files once:
 dart run sqflite_common_ffi_web:setup
 ```
 
+If saving fails with a WebAssembly error, download the `sqlite3.wasm` that matches the `sqlite3` version in `pubspec.lock` from https://github.com/simolus3/sqlite3.dart/releases into `web/`.
+
 ## How to run
 
 The repository contains the Dart source and `pubspec.yaml`. Generate the platform folders once, then run:
