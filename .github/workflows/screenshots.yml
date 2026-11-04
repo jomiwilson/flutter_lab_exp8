@@ -30,9 +30,9 @@ jobs:
         run: |
           dart run sqflite_common_ffi_web:setup
           # Use the sqlite3.wasm build that matches the resolved sqlite3 package
-          V=$(grep -A6 '^  sqlite3:' pubspec.lock | grep 'version:' | head -1 | sed 's/.*"\(.*\)".*/\1/')
+          V=$(awk '/^  sqlite3:/{f=1} f && /version:/{gsub(/"/,"",$2); print $2; exit}' pubspec.lock)
           echo "sqlite3 package version: $V"
-          curl -fsSL -o web/sqlite3.wasm "https://github.com/simolus3/sqlite3.dart/releases/download/sqlite3-$V/sqlite3.wasm"
+          curl -fsSL -o web/sqlite3.wasm "https://github.com/simolus3/sqlite3.dart/releases/download/sqlite3-$V/sqlite3.wasm" || echo "no matching wasm, keeping default"
       - name: Build web
         run: flutter build web --release
       - uses: actions/setup-node@v4
