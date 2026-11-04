@@ -10,6 +10,7 @@ const browser = await chromium.launch();
 const ctx = await browser.newContext({ viewport: { width: 412, height: 870 }, deviceScaleFactor: 2 });
 const page = await ctx.newPage();
 page.on('console', m => console.log('[console]', m.text()));
+page.on('pageerror', e => console.log('[pageerror]', e.message));
 const wait = ms => page.waitForTimeout(ms);
 let n = 0;
 const shot = async name => { n++; await page.screenshot({ path: `screenshots/${String(n).padStart(2, '0')}_${name}.png` }); console.log('shot', name); };

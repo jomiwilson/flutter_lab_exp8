@@ -11,7 +11,7 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   // SQLite on the web uses the sqflite web (WASM) implementation
   if (kIsWeb) {
-    databaseFactory = databaseFactoryFfiWeb;
+    databaseFactory = databaseFactoryFfiWebNoWebWorker;
   }
   // Initialize Firebase before running the application
   try {
@@ -65,17 +65,25 @@ class _SQLitePageState extends State<SQLitePage> {
 
   Future<void> saveStudent() async {
     if (nameController.text.isEmpty || courseController.text.isEmpty) return;
-    if (editingId == null) {
-      await DatabaseHelper.instance
-          .insertStudent(nameController.text, courseController.text);
-    } else {
-      await DatabaseHelper.instance
-          .updateStudent(editingId!, nameController.text, courseController.text);
-      editingId = null;
+    try {
+      if (editingId == null) {
+        await DatabaseHelper.instance
+            .insertStudent(nameController.text, courseController.text);
+      } else {
+        await DatabaseHelper.instance.updateStudent(
+            editingId!, nameController.text, courseController.text);
+        editingId = null;
+      }
+      nameController.clear();
+      courseController.clear();
+      await loadStudents();
+    } catch (e) {
+      debugPrint('SQLite error: $e');
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Could not save: $e')),
+      );
     }
-    nameController.clear();
-    courseController.clear();
-    loadStudents();
   }
 
   void editStudent(Map<String, dynamic> student) {
